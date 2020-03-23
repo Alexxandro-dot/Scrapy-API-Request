@@ -4,7 +4,7 @@ import json
 from scrapy import Spider
 from scrapy.http import Request
 
-#vorher: ShoesSpider(scrapy.Spider)
+
 class ShoesSpider(Spider):
     name = 'asoswomen'
     allowed_domains = ['asos.com']
@@ -21,12 +21,9 @@ class ShoesSpider(Spider):
                             callback=self.parse)
 
     def parse_hoodies(self, response): 
-        #ab hier kommt API ins Spiel (weil wir den Preis nicht normal scrapen können- Produktname funktioniert)
         product_name=response.xpath("//h1/text()").get()
-        product_id=response.url.split('/prd/')[1].split("?")[0]
-        #das ist API Adresse von Request URL (Method:GET)
+        product_id=response.url.split('/prd/')[1].split("?")[0]     
         price_api_url='https://www.asos.com/api/product/catalogue/v3/stockprice?productIds='+ product_id +'&store=COM&currency=GBP'          
-        #go to json backend and extract the price from the product
         yield Request(price_api_url,
                     meta={'product_name': product_name},
                     callback=self.parse_hoodie_price)
@@ -34,10 +31,8 @@ class ShoesSpider(Spider):
         
 
 
-    def parse_hoodie_price (self, response):
-        #loads= String
-        jsonresponse=json.loads(response.body.decode('utf-8'))
-        #api-exctracten= siehe Excel 
+    def parse_hoodie_price (self, response):       
+        jsonresponse=json.loads(response.body.decode('utf-8'))         
         price = jsonresponse[0]['productPrice']['current']['value']
         product_code= jsonresponse[0]['productCode']
         product_id= jsonresponse[0]['productId']
